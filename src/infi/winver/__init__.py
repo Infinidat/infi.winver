@@ -1,6 +1,6 @@
 __import__("pkg_resources").declare_namespace(__name__)
 
-class Windows(object):
+class Windows(object): #pylint: disable-msg=R0902,R0904
     def __init__(self):
         from .interface import get_version_ex, get_system_info
         self.hyper_v = False
@@ -56,7 +56,7 @@ class Windows(object):
     def analyze_windows5_edition(self):
         from .constants import VER_SUITE_BACKOFFICE, VER_SUITE_COMPUTE_SERVER, VER_SUITE_DATACENTER
         from .constants import VER_SUITE_ENTERPRISE, VER_SUITE_STORAGE_SERVER, VER_SUITE_WH_SERVER
-        (product, mask) = (self._version_ex.suite_mask, self._version_ex.product_type)
+        (_, mask) = (self._version_ex.suite_mask, self._version_ex.product_type)
         if mask & VER_SUITE_BACKOFFICE:
             self.edition = 'BackOffice'
         elif mask & VER_SUITE_COMPUTE_SERVER:
@@ -80,7 +80,7 @@ class Windows(object):
                             self._version_ex.service_pack_minor)
 
     def analyze_windows6_edition(self):
-        from .constants import PRODUCT_SUITE_BUSINESS, PRODUCT_SUITE_CLUSTER, PRODUCT_SUITE_DATACENTER
+        from .constants import PRODUCT_SUITE_CLUSTER, PRODUCT_SUITE_DATACENTER
         from .constants import PRODUCT_SUITE_ENTERPRISE, PRODUCT_SUITE_STORAGE, PRODUCT_SUITE_STANDARD
         from .constants import PRODUCT_SUITE_SMALL_BUSINESS
         from .constants import SERVER_CORE, HYPER_V
