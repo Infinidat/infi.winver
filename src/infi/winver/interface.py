@@ -56,7 +56,6 @@ def get_version_ex():
     instance.version_info_size = OSVersionEx.sizeof()
     buffer = create_string_buffer(OSVersionEx.instance_to_string(instance))
     GetVersionExA(buffer)
-    print repr(buffer.raw)
     return OSVersionEx.create_instance_from_string(buffer)
 
 def get_system_info():
