@@ -29,12 +29,12 @@ class Windows(object): #pylint: disable-msg=R0902,R0904
         elif (major, minor) == (5, 2):
             self.version = 'Windows Server 2003'
         elif (major, minor) == (6, 0):
-            if self._version_ex['wProductType'] == 1:
+            if self._version_ex.product_type == 1:
                 self.version = 'Windows Vista'
             else:
                 self.version = 'Windows Server 2008'
         elif (major, minor) == (6, 1):
-            if self._version_ex['wProductType'] == 1:
+            if self._version_ex.product_type == 1:
                 self.version = 'Windows 7'
             else:
                 self.version = 'Windows Server 2008 R2'
