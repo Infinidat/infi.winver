@@ -1,34 +1,34 @@
 
-from infi.instruct import Struct, UBInt32, FixedSizeString, UBInt16, UBInt8, UBInt64
+from infi.instruct import Struct, ULInt32, FixedSizeString, ULInt16, ULInt8, ULInt64
 
 def _is_64bit():
     from sys import maxsize
     return maxsize > 2 ** 32
 
-DWORD = UBInt32
+DWORD = ULInt32
 TCHAR = FixedSizeString
-WORD = UBInt16
-BYTE = UBInt8
-LPVOID = UBInt64 if _is_64bit() else UBInt32
+WORD = ULInt16
+BYTE = ULInt8
+LPVOID = ULInt64 if _is_64bit() else ULInt32
 BOOL = DWORD
 
 class OSVersionEx(Struct):
     _fields_ = [
-        DWORD("size"),
-        DWORD("major_version"),
-        DWORD("minor_version"),
-        DWORD("build_number"),
-        DWORD("platform_id"),
-        TCHAR("csd_version", 128),
-        WORD("service_pack_major"),
-        WORD("service_pack_minor"),
-        WORD("suite_mask"),
-        BYTE("product_type"),
-        BYTE("reserved")
+        DWORD("version_info_size", 0),
+        DWORD("major_version", 0),
+        DWORD("minor_version", 0),
+        DWORD("build_number", 0),
+        DWORD("platform_id", 0),
+        TCHAR("csd_version", 128, '\x00'*128),
+        WORD("service_pack_major", 0),
+        WORD("service_pack_minor", 0),
+        WORD("suite_mask", 0),
+        BYTE("product_type", 0),
+        BYTE("reserved", 0)
         ]
 
 class SystemInfo(Struct):
-    _fields = [
+    _fields_ = [
         DWORD("oem_id"),
         WORD("processor_architecture"),
         WORD("resrrved"),

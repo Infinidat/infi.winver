@@ -109,11 +109,12 @@ class Windows(object):
     def analyze_windows_architecture(self):
         from .constants import PROCESSOR_ARCHITECTURE_AMD64, PROCESSOR_ARCHITECTURE_IA64, PROCESSOR_ARCHITECTURE_INTEL
         self.architecture = ''
-        if self._system_info[0] == PROCESSOR_ARCHITECTURE_AMD64:
+        processor = self._system_info.processor_architecture
+        if processor == PROCESSOR_ARCHITECTURE_AMD64:
             self.architecture = 'x64'
-        elif self._system_info[0] == PROCESSOR_ARCHITECTURE_IA64:
+        elif processor == PROCESSOR_ARCHITECTURE_IA64:
             self.architecture = 'ia64'
-        elif self._system_info[0] == PROCESSOR_ARCHITECTURE_INTEL:
+        elif processor == PROCESSOR_ARCHITECTURE_INTEL:
             self.architecture = 'x86'
         else:
             self.architecture = 'unknown'

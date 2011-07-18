@@ -5,24 +5,24 @@ Created on Jul 18, 2011
 '''
 
 from infi.crap import WrappedFunction
-from infi.crap import errcheck_nonzero, errcheck_nothing
+from infi.crap import errcheck_zero, errcheck_nothing
 from infi.crap import IN, IN_OUT, OUT
 
-from ctypes import c_void_p, c_buffer, sizeof, c_ulong, byref
-from ctypes.cdll import LoadLibrary
+from ctypes import c_void_p, c_buffer, sizeof, c_ulong, byref, create_string_buffer
 
 class LibraryFunction(WrappedFunction):
     @classmethod
     def _get_library(cls):
         try:
-            return LoadLibrary("kernel32.dll")
+            import ctypes
+            return ctypes.windll.kernel32
         except:
             raise OSError
 
-class GetVersionEx(LibraryFunction):
+class GetVersionExA(LibraryFunction):
     @classmethod
     def get_errcheck(cls):
-        return errcheck_nonzero()
+        return errcheck_zero()
 
     @classmethod
     def get_parameters(cls):
@@ -40,7 +40,7 @@ class GetSystemInfo(LibraryFunction):
 class GetProductInfo(LibraryFunction):
     @classmethod
     def get_errcheck(cls):
-        return errcheck_nonzero()
+        return errcheck_zero()
 
     @classmethod
     def get_parameters(cls):
@@ -52,13 +52,16 @@ class GetProductInfo(LibraryFunction):
 
 def get_version_ex():
     from .structures import OSVersionEx
-    buffer = c_buffer(sizeof(OSVersionEx))
-    GetVersionEx(buffer)
+    instance = OSVersionEx()
+    instance.version_info_size = OSVersionEx.sizeof()
+    buffer = create_string_buffer(OSVersionEx.instance_to_string(instance))
+    GetVersionExA(buffer)
+    print repr(buffer.raw)
     return OSVersionEx.create_instance_from_string(buffer)
 
 def get_system_info():
     from .structures import SystemInfo
-    buffer = c_buffer(sizeof(SystemInfo))
+    buffer = c_buffer(SystemInfo.sizeof())
     GetSystemInfo(buffer)
     return SystemInfo.create_instance_from_string(buffer)
 
