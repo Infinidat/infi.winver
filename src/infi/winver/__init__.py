@@ -45,7 +45,6 @@ class Windows(object):
         self.server_core = False
         self.hyper_v = False
         self.edition = 'Standard'
-        pdb; pdb.set_trace()
         if self.is_windows_2000() or self.is_windows_2003() or self.is_windows_xp():
             self.analyze_windows5_edition()
         elif self.is_windows_2008() or self.is_windows_2008_r2() or self.is_windows_vista() or self.is_windows_7():
