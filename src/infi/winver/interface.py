@@ -49,6 +49,7 @@ def get_version_ex():
     from .structures import OSVersionEx
     instance = OSVersionEx()
     instance.version_info_size = OSVersionEx.min_max_sizeof().max #pylint: disable-msg=E1101
+    instance.csd_version = '\x00' * 128
     buff = create_string_buffer(OSVersionEx.instance_to_string(instance)) #pylint: disable-msg=E1101
     GetVersionExA(buff)
     return OSVersionEx.create_instance_from_string(buff) #pylint: disable-msg=E1101

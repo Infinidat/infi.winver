@@ -19,7 +19,7 @@ class OSVersionEx(Struct):
         DWORD("minor_version", 0),
         DWORD("build_number", 0),
         DWORD("platform_id", 0),
-        TCHAR("csd_version", 128, '\x00'*128),
+        TCHAR("csd_version", 128),
         WORD("service_pack_major", 0),
         WORD("service_pack_minor", 0),
         WORD("suite_mask", 0),
