@@ -48,14 +48,14 @@ class GetProductInfo(LibraryFunction):
 def get_version_ex():
     from .structures import OSVersionEx
     instance = OSVersionEx()
-    instance.version_info_size = OSVersionEx.sizeof() #pylint: disable-msg=E1101
+    instance.version_info_size = OSVersionEx.min_max_sizeof().max #pylint: disable-msg=E1101
     buff = create_string_buffer(OSVersionEx.instance_to_string(instance)) #pylint: disable-msg=E1101
     GetVersionExA(buff)
     return OSVersionEx.create_instance_from_string(buff) #pylint: disable-msg=E1101
 
 def get_system_info():
     from .structures import SystemInfo
-    buff = c_buffer(SystemInfo.sizeof()) #pylint: disable-msg=E1101
+    buff = c_buffer(SystemInfo.min_max_sizeof().max) #pylint: disable-msg=E1101
     GetSystemInfo(buff)
     return SystemInfo.create_instance_from_string(buff) #pylint: disable-msg=E1101
 
