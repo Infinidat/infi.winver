@@ -52,13 +52,13 @@ def get_version_ex():
     instance.csd_version = '\x00' * 128
     buff = create_string_buffer(OSVersionEx.write_to_string(instance)) #pylint: disable-msg=E1101
     GetVersionExA(buff)
-    return OSVersionEx.create_instance_from_string(buff) #pylint: disable-msg=E1101
+    return OSVersionEx.create_from_string(buff) #pylint: disable-msg=E1101
 
 def get_system_info():
     from .structures import SystemInfo
     buff = c_buffer(SystemInfo.min_max_sizeof().max) #pylint: disable-msg=E1101
     GetSystemInfo(buff)
-    return SystemInfo.create_instance_from_string(buff) #pylint: disable-msg=E1101
+    return SystemInfo.create_from_string(buff) #pylint: disable-msg=E1101
 
 def get_product_info(major_version, minor_version, service_pack_major, service_pack_minor):
     result = c_ulong()
