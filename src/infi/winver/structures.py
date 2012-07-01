@@ -29,9 +29,8 @@ class OSVersionEx(Struct):
 
 class SystemInfo(Struct):
     _fields_ = [
-        DWORD("oem_id"),
         WORD("processor_architecture"),
-        WORD("resrrved"),
+        WORD("reserved"),
         DWORD("page_Size"),
         LPVOID("minimum_application_address"),
         LPVOID("maximum_application_address"),

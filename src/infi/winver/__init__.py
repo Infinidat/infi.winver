@@ -38,6 +38,11 @@ class Windows(object): #pylint: disable-msg=R0902,R0904
                 self.version = 'Windows 7'
             else:
                 self.version = 'Windows Server 2008 R2'
+        elif (major, minor) == (6, 2):
+            if self._version_ex.product_type == 1:
+                self.version = 'Windows 8'
+            else:
+                self.version = 'Windows Server 2012'
         else:
             self.version = 'Unknown'
 
@@ -45,9 +50,9 @@ class Windows(object): #pylint: disable-msg=R0902,R0904
         self.server_core = False
         self.hyper_v = False
         self.edition = 'Standard'
-        if self.is_windows_2000() or self.is_windows_2003() or self.is_windows_xp():
+        if self._version_ex.major_version == 5:
             self.analyze_windows5_edition()
-        elif self.is_windows_2008() or self.is_windows_2008_r2() or self.is_windows_vista() or self.is_windows_7():
+        elif self._version_ex.major_version == 6:
             self._edition = self.get_windows6_edition()
             self.analyze_windows6_edition()
         else:
@@ -142,6 +147,12 @@ class Windows(object): #pylint: disable-msg=R0902,R0904
 
     def is_windows_7(self):
         return self.version == 'Windows 7'
+
+    def is_windows_8(self):
+        return self.version == 'Windows 8'
+
+    def is_windows_2012(self):
+        return self.version == 'Windows Server 2012'
 
     def is_x86(self):
         return self.architecture == 'x86'
