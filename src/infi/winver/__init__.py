@@ -1,5 +1,18 @@
 __import__("pkg_resources").declare_namespace(__name__)
 
+version_to_name = {
+    (5, 0): 'Windows 2000',
+    (5, 1): 'Windows XP',
+    (5, 2): 'Windows Server 2003',
+    (6, 0, 1): 'Windows Vista',
+    (6, 0): 'Windows Server 2008',
+    (6, 1, 1): 'Windows 7',
+    (6, 1): 'Windows Server 2008 R2',
+    (6, 2, 1): 'Windows 8',
+    (6, 2): 'Windows Server 2012',
+}
+name_to_version = {value: key[:2] for key, value in version_to_name.items()}
+
 class Windows(object): #pylint: disable-msg=R0902,R0904
     def __init__(self):
         from .interface import get_version_ex, get_system_info
@@ -21,30 +34,8 @@ class Windows(object): #pylint: disable-msg=R0902,R0904
         self.analyze_windows_architecture()
 
     def analyze_windows_version(self):
-        (major, minor) = self._version_ex.major_version, self._version_ex.minor_version
-        if (major, minor) == (5, 0):
-            self.version = 'Windows 2000'
-        elif (major, minor) == (5, 1):
-            self.version = 'Windows XP'
-        elif (major, minor) == (5, 2):
-            self.version = 'Windows Server 2003'
-        elif (major, minor) == (6, 0):
-            if self._version_ex.product_type == 1:
-                self.version = 'Windows Vista'
-            else:
-                self.version = 'Windows Server 2008'
-        elif (major, minor) == (6, 1):
-            if self._version_ex.product_type == 1:
-                self.version = 'Windows 7'
-            else:
-                self.version = 'Windows Server 2008 R2'
-        elif (major, minor) == (6, 2):
-            if self._version_ex.product_type == 1:
-                self.version = 'Windows 8'
-            else:
-                self.version = 'Windows Server 2012'
-        else:
-            self.version = 'Unknown'
+        version = (self._version_ex.major_version, self._version_ex.minor_version, self._version_ex.product_type)
+        self.version = version_to_name.get(version, version_to_name.get(version[:2], 'Unknown'))
 
     def analyze_windows_edition(self):
         self.server_core = False
@@ -175,3 +166,9 @@ class Windows(object): #pylint: disable-msg=R0902,R0904
         if self.edition == 'Datacenter':
             return True
         return False
+
+    def greater_than(self, os_name):
+        if os_name not in name_to_version:
+            raise Exception("Could not find OS name {}".format(os_name))
+        actual_version = (self._version_ex.major_version, self._version_ex.minor_version)
+        return actual_version > name_to_version[os_name]
