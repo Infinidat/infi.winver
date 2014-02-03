@@ -47,6 +47,10 @@ class Windows(object): #pylint: disable-msg=R0902,R0904
         elif self._version_ex.major_version == 6:
             self._edition = self.get_windows6_edition()
             self.analyze_windows6_edition()
+            if self._version_ex.minor_version >= 2:
+                # http://msdn.microsoft.com/en-us/library/windows/desktop/ms724358(v=vs.85).aspx
+                # PRODUCT_*_SERVER_CORE values are not returned in Windows Server 2012
+                self.analyze_server_core_according_to_registry()
         else:
             self.edition = 'Unknown'
 
@@ -75,6 +79,14 @@ class Windows(object): #pylint: disable-msg=R0902,R0904
                             self._version_ex.minor_version,
                             self._version_ex.service_pack_major,
                             self._version_ex.service_pack_minor)
+
+    def analyze_server_core_according_to_registry(self):
+        # http://msdn.microsoft.com/en-us/library/windows/desktop/hh846315%28v=vs.85%29.aspx
+        from infi.registry import LocalComputer
+        KEY = r"SOFTWARE\Microsoft\Windows NT\CurrentVersion\Server\ServerLevels"
+        FEATURES = ("ServerCore", "Server-Gui-Mgmt", "Server-Gui-Shell")
+        store = LocalComputer().local_machine[KEY].values_stroe
+        self.server_core = all(item in store for item in FEATURES)
 
     def analyze_windows6_edition(self):
         from .constants import PRODUCT_SUITE_CLUSTER, PRODUCT_SUITE_DATACENTER
