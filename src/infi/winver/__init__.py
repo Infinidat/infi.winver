@@ -80,12 +80,27 @@ class Windows(object): #pylint: disable-msg=R0902,R0904
                             self._version_ex.service_pack_major,
                             self._version_ex.service_pack_minor)
 
+    def analyze_server_core_according_to_dism(self):
+        # http://stackoverflow.com/questions/13065479/how-to-detect-windows-2012-core-edition-c
+        from os import environ, path
+        from infi.execute import execute
+        SYSTEMROOT = environ.get("SystemRoot", path.join("C:", "Windows"))
+        dism = path.join(environ.get("SYSTEMROOT"), "System32", "dism.exe")
+        pid = execute([dism, "/online", "/get-features", "/format:table"])
+        self.server_core = any("ServerCore-FullServer" in line and "Enabled" in line for
+                               line in pid.get_stdout().splitlines())
+
     def analyze_server_core_according_to_registry(self):
         # http://msdn.microsoft.com/en-us/library/windows/desktop/hh846315%28v=vs.85%29.aspx
         from infi.registry import LocalComputer
+        from infi.registry.errors import AccessDeniedException
         KEY = r"SOFTWARE\Microsoft\Windows NT\CurrentVersion\Server\ServerLevels"
         FEATURES = ("ServerCore", "Server-Gui-Mgmt", "Server-Gui-Shell")
-        store = LocalComputer().local_machine[KEY].values_stroe
+        try:
+            store = LocalComputer().local_machine[KEY].values_store
+        except AccessDeniedException:
+            self.analyze_server_core_according_to_dism()
+            return
         self.server_core = all(item in store for item in FEATURES)
 
     def analyze_windows6_edition(self):
