@@ -1,8 +1,5 @@
 
-from infi.crap import WrappedFunction
-from infi.crap import errcheck_zero, errcheck_nothing
-from infi.crap import IN, IN_OUT
-
+from infi.cwrap import WrappedFunction, errcheck_zero, errcheck_nothing, IN, IN_OUT
 from ctypes import c_void_p, c_buffer, c_ulong, byref, create_string_buffer
 
 class LibraryFunction(WrappedFunction):
