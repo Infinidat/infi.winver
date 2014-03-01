@@ -9,7 +9,7 @@ def print_records():
     try:
         product_info = get_product_info(version.major_version, version.minor_version,
                                     version.service_pack_major, version.service_pack_minor)
-    except: #pylint: disable-msg=W0702
+    except:  # pylint: disable-msg=W0702
         # product_info not available on Windows 2003, XP
         product_info = None
     print "OSVersionEx = %s" % repr(OSVersionEx.write_to_string(version))

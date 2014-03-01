@@ -39,4 +39,4 @@ class WindowsTestCase(unittest.TestCase):
     @unittest.parameters.iterate("record", EXAMPLES)
     def test_init(self, record):
         with self._mocked_interface(record):
-            _ = Windows()
+            Windows()

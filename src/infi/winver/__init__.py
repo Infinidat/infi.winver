@@ -14,7 +14,7 @@ version_to_name = {
 }
 name_to_version = {value: key[:2] for key, value in version_to_name.items()}
 
-class Windows(object): #pylint: disable-msg=R0902,R0904
+class Windows(object):  # pylint: disable-msg=R0902,R0904
     def __init__(self):
         from .interface import get_version_ex, get_system_info
         self.hyper_v = False
@@ -84,7 +84,6 @@ class Windows(object): #pylint: disable-msg=R0902,R0904
         # http://stackoverflow.com/questions/13065479/how-to-detect-windows-2012-core-edition-c
         from os import environ, path
         from infi.execute import execute
-        SYSTEMROOT = environ.get("SystemRoot", path.join("C:", "Windows"))
         dism = path.join(environ.get("SYSTEMROOT"), "System32", "dism.exe")
         pid = execute([dism, "/online", "/get-features", "/format:table"])
         self.server_core = any("ServerCore-FullServer" in line and "Disabled" in line for
