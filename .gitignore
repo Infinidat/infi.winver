@@ -39,3 +39,6 @@ bootstrap.py
 
 
 src/infi/winver/__version__.py
+.cache
+eggs
+parts
