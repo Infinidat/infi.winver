@@ -97,6 +97,8 @@ class Windows(object):  # pylint: disable-msg=R0902,R0904
         FEATURES = ("ServerCore", "Server-Gui-Mgmt", "Server-Gui-Shell")
         try:
             store = LocalComputer().local_machine[KEY].values_store
+        except KeyError:
+            return
         except AccessDeniedException:
             self.analyze_server_core_according_to_dism()
             return
