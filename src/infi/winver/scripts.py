@@ -1,3 +1,4 @@
+from __future__ import print_function
 
 #pylint: disable-msg=E1101
 def print_records():
@@ -12,6 +13,6 @@ def print_records():
     except:  # pylint: disable-msg=W0702
         # product_info not available on Windows 2003, XP
         product_info = None
-    print "OSVersionEx = %s" % repr(OSVersionEx.write_to_string(version))
-    print "SystemInfo = %s" % repr(SystemInfo.write_to_string(system_info))
-    print "ProductInfo = %s" % repr(product_info)
+    print("OSVersionEx = %s" % repr(OSVersionEx.write_to_string(version)))
+    print("SystemInfo = %s" % repr(SystemInfo.write_to_string(system_info)))
+    print("ProductInfo = %s" % repr(product_info))
