@@ -21,16 +21,15 @@ class InterfaceTestCase(unittest.TestCase):
         from .scripts import print_records
         print_records()
 
-from contextlib import contextmanager, nested
+from contextlib import contextmanager
 from . import Windows
 
 class WindowsTestCase(unittest.TestCase):
     @contextmanager
     def _mocked_interface(self, record):
-        with nested(mock.patch("infi.winver.interface.GetVersionExA"),
-                    mock.patch("infi.winver.interface.GetSystemInfo"),
-                    mock.patch("infi.winver.interface.GetProductInfo")) \
-                    as (get_version, get_system, get_product):
+        with mock.patch("infi.winver.interface.GetVersionExA") as get_version, \
+             mock.patch("infi.winver.interface.GetSystemInfo") as get_system, \
+             mock.patch("infi.winver.interface.GetProductInfo") as get_product:
             get_version.return_value = record["OSVersionEx"]
             get_system.return_value = record["SystemInfo"]
             get_product.return_value = record["ProductInfo"]
