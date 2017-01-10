@@ -9,8 +9,10 @@ version_to_name = {
     (6, 1, 1): 'Windows 7',
     (6, 1): 'Windows Server 2008 R2',
     (6, 2, 1): 'Windows 8',
+    (10, 0, 1): 'Windows 10',
     (6, 2): 'Windows Server 2012',
     (6, 3): 'Windows Server 2012 R2',
+    (10, 0): 'Windows Server 2016',
 }
 name_to_version = {value: key[:2] for key, value in version_to_name.items()}
 
@@ -171,11 +173,17 @@ class Windows(object):  # pylint: disable-msg=R0902,R0904
     def is_windows_8(self):
         return self.version == 'Windows 8'
 
+    def is_windows_10(self):
+        return self.version == 'Windows 10'
+
     def is_windows_2012(self):
         return self.version == 'Windows Server 2012'
 
     def is_windows_2012_r2(self):
         return self.version == 'Windows Server 2012 R2'
+
+    def is_windows_2016(self):
+        return self.version == 'Windows Server 2016'
 
     def is_x86(self):
         return self.architecture == 'x86'
