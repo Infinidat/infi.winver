@@ -36,8 +36,13 @@ class Windows(object):  # pylint: disable-msg=R0902,R0904
         self.analyze_windows_service_pack()
         self.analyze_windows_architecture()
 
+        from infi.winver.interface import get_version_ex, get_system_info
+
     def analyze_windows_version(self):
         version = (self._version_ex.major_version, self._version_ex.minor_version, self._version_ex.product_type)
+        if version[:2] == (6, 2):
+            if self.analyze_windows_2016_version_by_registry() == 10:
+                version = (10, 0)
         self.version = version_to_name.get(version, version_to_name.get(version[:2], 'Unknown'))
 
     def analyze_windows_edition(self):
@@ -105,6 +110,17 @@ class Windows(object):  # pylint: disable-msg=R0902,R0904
             self.analyze_server_core_according_to_dism()
             return
         self.server_core = all(item in store for item in FEATURES)
+
+    def analyze_windows_2016_version_by_registry(self):
+        from infi.registry import LocalComputer
+        registry_path = r'Software\Microsoft\Windows NT\CurrentVersion'
+        registry_key = 'CurrentMajorVersionNumber'
+        try:
+            local_machine = LocalComputer().local_machine
+            reg_folder = local_machine[registry_path]
+            return reg_folder.values_store.keys()[registry_key].to_python_object()
+        except:
+            pass
 
     def analyze_windows6_edition(self):
         from .constants import PRODUCT_SUITE_CLUSTER, PRODUCT_SUITE_DATACENTER
