@@ -9,8 +9,10 @@ version_to_name = {
     (6, 1, 1): 'Windows 7',
     (6, 1): 'Windows Server 2008 R2',
     (6, 2, 1): 'Windows 8',
+    (10, 0, 1): 'Windows 10',
     (6, 2): 'Windows Server 2012',
     (6, 3): 'Windows Server 2012 R2',
+    (10, 0): 'Windows Server 2016',
 }
 name_to_version = {value: key[:2] for key, value in version_to_name.items()}
 
@@ -34,8 +36,13 @@ class Windows(object):  # pylint: disable-msg=R0902,R0904
         self.analyze_windows_service_pack()
         self.analyze_windows_architecture()
 
+        from infi.winver.interface import get_version_ex, get_system_info
+
     def analyze_windows_version(self):
         version = (self._version_ex.major_version, self._version_ex.minor_version, self._version_ex.product_type)
+        if version[:2] == (6, 2):
+            if self.analyze_windows_2016_version_by_registry() == 10:
+                version = (10, 0)
         self.version = version_to_name.get(version, version_to_name.get(version[:2], 'Unknown'))
 
     def analyze_windows_edition(self):
@@ -104,6 +111,17 @@ class Windows(object):  # pylint: disable-msg=R0902,R0904
             return
         self.server_core = all(item in store for item in FEATURES)
 
+    def analyze_windows_2016_version_by_registry(self):
+        from infi.registry import LocalComputer
+        registry_path = r'Software\Microsoft\Windows NT\CurrentVersion'
+        registry_key = 'CurrentMajorVersionNumber'
+        try:
+            local_machine = LocalComputer().local_machine
+            reg_folder = local_machine[registry_path]
+            return reg_folder.values_store.keys()[registry_key].to_python_object()
+        except:
+            pass
+
     def analyze_windows6_edition(self):
         from .constants import PRODUCT_SUITE_CLUSTER, PRODUCT_SUITE_DATACENTER
         from .constants import PRODUCT_SUITE_ENTERPRISE, PRODUCT_SUITE_STORAGE, PRODUCT_SUITE_STANDARD
@@ -171,11 +189,17 @@ class Windows(object):  # pylint: disable-msg=R0902,R0904
     def is_windows_8(self):
         return self.version == 'Windows 8'
 
+    def is_windows_10(self):
+        return self.version == 'Windows 10'
+
     def is_windows_2012(self):
         return self.version == 'Windows Server 2012'
 
     def is_windows_2012_r2(self):
         return self.version == 'Windows Server 2012 R2'
+
+    def is_windows_2016(self):
+        return self.version == 'Windows Server 2016'
 
     def is_x86(self):
         return self.architecture == 'x86'
