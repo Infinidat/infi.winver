@@ -94,7 +94,7 @@ class Windows(object):  # pylint: disable-msg=R0902,R0904
         dism = path.join(environ.get("SYSTEMROOT"), "System32", "dism.exe")
         pid = execute([dism, "/online", "/get-features", "/format:table"])
         self.server_core = any("ServerCore-FullServer" in line and "Disabled" in line for
-                               line in pid.get_stdout().splitlines())
+                               line in pid.get_stdout().decode().splitlines())
 
     def analyze_server_core_according_to_registry(self):
         # http://msdn.microsoft.com/en-us/library/windows/desktop/hh846315%28v=vs.85%29.aspx
