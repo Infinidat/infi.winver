@@ -34,7 +34,7 @@ win10_server_release_id_to_update = {
     1809: 'RTM',
 }
 
-name_to_version = {value: key[:2] for key, value in version_to_name.items()}
+name_to_version = {value: key for key, value in version_to_name.items()}
 
 class Windows(object):  # pylint: disable-msg=R0902,R0904
     def __init__(self):
@@ -272,4 +272,9 @@ class Windows(object):  # pylint: disable-msg=R0902,R0904
             actual_version = (self._version_ex.major_version, self._version_ex.minor_version, self._release_id)
         else:
             actual_version = (self._version_ex.major_version, self._version_ex.minor_version)
-        return actual_version > name_to_version[os_name]
+        compared_version = name_to_version[os_name]
+        if compared_version[0] < 10:
+            # in name_to_version, values of Windows 10 have the release id in position 2
+            # other values may have product id which needs to be stripped
+            compared_version = compared_version[:2]
+        return actual_version > compared_version
