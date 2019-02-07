@@ -127,23 +127,23 @@ class Windows(object):  # pylint: disable-msg=R0902,R0904
         from .constants import PRODUCT_SUITE_ENTERPRISE, PRODUCT_SUITE_STORAGE, PRODUCT_SUITE_STANDARD
         from .constants import PRODUCT_SUITE_SMALL_BUSINESS
         from .constants import SERVER_CORE, HYPER_V
-        if PRODUCT_SUITE_CLUSTER.__contains__(self._edition):
+        if self._edition in PRODUCT_SUITE_CLUSTER:
             self.edition = 'Compute Cluster'
-        if PRODUCT_SUITE_DATACENTER.__contains__(self._edition):
+        if self._edition in PRODUCT_SUITE_DATACENTER:
             self.edition = 'Datacenter'
-        elif PRODUCT_SUITE_ENTERPRISE.__contains__(self._edition):
+        elif self._edition in PRODUCT_SUITE_ENTERPRISE:
             self.edition = 'Enterprise'
-        elif PRODUCT_SUITE_STORAGE.__contains__(self._edition):
+        elif self._edition in PRODUCT_SUITE_STORAGE:
             self.edition = 'Storage'
-        elif PRODUCT_SUITE_STANDARD.__contains__(self._edition):
+        elif self._edition in PRODUCT_SUITE_STANDARD:
             self.edition = 'Standard'
-        elif PRODUCT_SUITE_SMALL_BUSINESS.__contains__(self._edition):
+        elif self._edition in PRODUCT_SUITE_SMALL_BUSINESS:
             self.edition = 'Small Business'
         else:
             self.edition = 'Client'
-        if SERVER_CORE.__contains__(self._edition):
+        if self._edition in SERVER_CORE:
             self.server_core = True
-        if HYPER_V.__contains__(self._edition):
+        if self._edition in HYPER_V:
             self.hyper_v = True
 
     def analyze_windows_service_pack(self):
