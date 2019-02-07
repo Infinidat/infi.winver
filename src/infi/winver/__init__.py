@@ -9,11 +9,31 @@ version_to_name = {
     (6, 1, 1): 'Windows 7',
     (6, 1): 'Windows Server 2008 R2',
     (6, 2, 1): 'Windows 8',
-    (10, 0, 1): 'Windows 10',
     (6, 2): 'Windows Server 2012',
     (6, 3): 'Windows Server 2012 R2',
-    (10, 0): 'Windows Server 2016',
+    # the following will *not* be used by analyze_windows_version.
+    # these are for "name_to_version" (used by greater_than)
+    (10, 0): 'Windows 10',
+    (10, 0, 1607): 'Windows Server 2016',
+    (10, 0, 1809): 'Windows Server 2019',
 }
+win10_release_id_to_update = {
+    1507: 'Gold',
+    1511: 'November Update',
+    1607: 'Aniversary Update',
+    1703: 'Creators Update',
+    1709: 'Fall Creators Update',
+    1803: 'April 2018 Update',
+    1809: 'October 2018 Update',
+}
+win10_server_release_id_to_update = {
+    1607: 'RTM',
+    1703: 'Aniversary Update',
+    1709: 'Fall Creators Update',
+    1803: 'version 1803',
+    1809: 'RTM',
+}
+
 name_to_version = {value: key[:2] for key, value in version_to_name.items()}
 
 class Windows(object):  # pylint: disable-msg=R0902,R0904
@@ -26,24 +46,44 @@ class Windows(object):  # pylint: disable-msg=R0902,R0904
         self.edition = ""
         self.version = ""
         self._version_ex = get_version_ex()
+        if self._version_ex.major_version == 10:
+            self._release_id = self.get_release_id_from_registry()
         self._system_info = get_system_info()
         self._edition = ""
         self.analyze()
 
     def analyze(self):
-        self.analyze_windows_version()
+        if self._version_ex.major_version == 10:
+            self.analyze_windows10_version()
+            self.analyze_windows10_update()
+        else:
+            self.analyze_windows_version()
         self.analyze_windows_edition()
         self.analyze_windows_service_pack()
         self.analyze_windows_architecture()
 
-        from infi.winver.interface import get_version_ex, get_system_info
-
     def analyze_windows_version(self):
         version = (self._version_ex.major_version, self._version_ex.minor_version, self._version_ex.product_type)
-        if version[:2] == (6, 2):
-            if self.analyze_windows_2016_version_by_registry() == 10:
-                version = (10, 0)
         self.version = version_to_name.get(version, version_to_name.get(version[:2], 'Unknown'))
+
+    def analyze_windows10_version(self):
+        from .constants import VER_NT_WORKSTATION
+        # Windows 10 and on, and Windows Server 2016 and on, use only "release id" to diffentiate different releases
+        # product_type still determines whether this is Windows 10 or Windows Server
+        if self._version_ex.product_type == VER_NT_WORKSTATION:
+            self.version = "Windows 10"
+        elif self._release_id < 1809:
+            self.version = "Windows Server 2016"
+        else:
+            self.version = "Windows Server 2019"
+
+    def analyze_windows10_update(self):
+        from .constants import VER_NT_WORKSTATION
+        if self._version_ex.product_type == VER_NT_WORKSTATION:
+            release_id_to_update = win10_release_id_to_update
+        else:
+            release_id_to_update = win10_server_release_id_to_update
+        self.win10_update = release_id_to_update.get(self._release_id, 'Unknown')
 
     def analyze_windows_edition(self):
         self.server_core = False
@@ -58,6 +98,9 @@ class Windows(object):  # pylint: disable-msg=R0902,R0904
                 # http://msdn.microsoft.com/en-us/library/windows/desktop/ms724358(v=vs.85).aspx
                 # PRODUCT_*_SERVER_CORE values are not returned in Windows Server 2012
                 self.analyze_server_core_according_to_registry()
+        elif self._version_ex.major_version == 10:
+            self._edition = self.get_windows6_edition()
+            self.analyze_windows6_edition()
         else:
             self.edition = 'Unknown'
 
@@ -111,16 +154,12 @@ class Windows(object):  # pylint: disable-msg=R0902,R0904
             return
         self.server_core = all(item in store for item in FEATURES)
 
-    def analyze_windows_2016_version_by_registry(self):
+    def get_release_id_from_registry(self):
         from infi.registry import LocalComputer
-        registry_path = r'Software\Microsoft\Windows NT\CurrentVersion'
-        registry_key = 'CurrentMajorVersionNumber'
-        try:
-            local_machine = LocalComputer().local_machine
-            reg_folder = local_machine[registry_path]
-            return reg_folder.values_store.keys()[registry_key].to_python_object()
-        except:
-            pass
+        local_machine = LocalComputer().local_machine
+        reg_folder = local_machine[r'Software\Microsoft\Windows NT\CurrentVersion']
+        release_id = int(reg_folder.values_store['ReleaseId'].to_python_object())
+        return release_id
 
     def analyze_windows6_edition(self):
         from .constants import PRODUCT_SUITE_CLUSTER, PRODUCT_SUITE_DATACENTER
@@ -201,6 +240,9 @@ class Windows(object):  # pylint: disable-msg=R0902,R0904
     def is_windows_2016(self):
         return self.version == 'Windows Server 2016'
 
+    def is_windows_2019(self):
+        return self.version == 'Windows Server 2019'
+
     def is_x86(self):
         return self.architecture == 'x86'
 
@@ -226,5 +268,8 @@ class Windows(object):  # pylint: disable-msg=R0902,R0904
     def greater_than(self, os_name):
         if os_name not in name_to_version:
             raise Exception("Could not find OS name {}".format(os_name))
-        actual_version = (self._version_ex.major_version, self._version_ex.minor_version)
+        if self._version_ex.major_version == 10:
+            actual_version = (self._version_ex.major_version, self._version_ex.minor_version, self._release_id)
+        else:
+            actual_version = (self._version_ex.major_version, self._version_ex.minor_version)
         return actual_version > name_to_version[os_name]
