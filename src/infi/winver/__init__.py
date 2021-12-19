@@ -101,7 +101,7 @@ class Windows(object):  # pylint: disable-msg=R0902,R0904
         self._build_number = self._version_ex.build_number
         if (self._major_version, self._minor_version) == (6, 2):
             # GetVersionEx will return 6.2 for Windows 2012 and up. See documentation above.
-            self._major_version, self._minor_version = self.get_version_from_registry()
+            self._major_version, self._minor_version, self._build_number = self.get_version_from_registry()
 
     def analyze_windows_version(self):
         version = (self._major_version, self._minor_version, self._product_type)
@@ -214,14 +214,13 @@ class Windows(object):  # pylint: disable-msg=R0902,R0904
         reg_folder = local_machine[r'Software\Microsoft\Windows NT\CurrentVersion']
         major_version = reg_folder.values_store.get('CurrentMajorVersionNumber')
         minor_version = reg_folder.values_store.get('CurrentMinorVersionNumber')
-        if major_version and minor_version:
+        build_number = reg_folder.values_store.get('CurrentBuildNumber')
+        if major_version and minor_version and build_number:
             # should be 10.0
-            return major_version.to_python_object(), minor_version.to_python_object()
+            return major_version.to_python_object(), minor_version.to_python_object(), build_number.to_python_object()
         # 6.2 or 6.3
         major_version, minor_version = reg_folder.values_store['CurrentVersion'].to_python_object().split('.')
-        return int(major_version), int(minor_version)
-
-        return major_version, minor_version
+        return int(major_version), int(minor_version), int(build_number)
 
     def analyze_windows6_edition(self):
         from .constants import PRODUCT_SUITE_CLUSTER, PRODUCT_SUITE_DATACENTER
