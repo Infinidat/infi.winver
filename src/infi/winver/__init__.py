@@ -214,10 +214,10 @@ class Windows(object):  # pylint: disable-msg=R0902,R0904
         reg_folder = local_machine[r'Software\Microsoft\Windows NT\CurrentVersion']
         major_version = reg_folder.values_store.get('CurrentMajorVersionNumber')
         minor_version = reg_folder.values_store.get('CurrentMinorVersionNumber')
-        build_number = reg_folder.values_store.get('CurrentBuildNumber')
+        build_number = reg_folder.values_store.get('CurrentBuildNumber').to_python_object()
         if major_version and minor_version and build_number:
             # should be 10.0
-            return major_version.to_python_object(), minor_version.to_python_object(), build_number.to_python_object()
+            return major_version.to_python_object(), minor_version.to_python_object(), build_number
         # 6.2 or 6.3
         major_version, minor_version = reg_folder.values_store['CurrentVersion'].to_python_object().split('.')
         return int(major_version), int(minor_version), int(build_number)
