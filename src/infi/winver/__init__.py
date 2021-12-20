@@ -215,12 +215,12 @@ class Windows(object):  # pylint: disable-msg=R0902,R0904
         major_version = reg_folder.values_store.get('CurrentMajorVersionNumber')
         minor_version = reg_folder.values_store.get('CurrentMinorVersionNumber')
         build_number = reg_folder.values_store.get('CurrentBuildNumber').to_python_object()
-        if major_version and minor_version and build_number:
+        if major_version and minor_version:
             # should be 10.0
             return major_version.to_python_object(), minor_version.to_python_object(), build_number
         # 6.2 or 6.3
         major_version, minor_version = reg_folder.values_store['CurrentVersion'].to_python_object().split('.')
-        return int(major_version), int(minor_version), int(build_number)
+        return int(major_version), int(minor_version), build_number
 
     def analyze_windows6_edition(self):
         from .constants import PRODUCT_SUITE_CLUSTER, PRODUCT_SUITE_DATACENTER
