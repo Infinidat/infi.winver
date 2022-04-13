@@ -62,6 +62,14 @@ FIRST_WIN_SERVER_2019_RELEASE_ID = 1809
 
 name_to_version = {value: key for key, value in version_to_name.items()}
 
+# Release ID became deprecated at some point and stopped changing.
+# The last value it can get is 2009. This last value is possible for
+# both win server 2019 and win server 2022. So we rely on the build_number.
+# See https://ss64.com/nt/ver.html
+LAST_RELEASE_ID = 2009
+
+FIRST_WIN_2022_SRVER_BUILD_NUMBER = 20285
+
 class Windows(object):  # pylint: disable-msg=R0902,R0904
     def __init__(self):
         from .interface import get_version_ex
@@ -90,9 +98,10 @@ class Windows(object):  # pylint: disable-msg=R0902,R0904
         self._major_version = self._version_ex.major_version
         self._minor_version = self._version_ex.minor_version
         self._product_type = self._version_ex.product_type
+        self._build_number = self._version_ex.build_number
         if (self._major_version, self._minor_version) == (6, 2):
             # GetVersionEx will return 6.2 for Windows 2012 and up. See documentation above.
-            self._major_version, self._minor_version = self.get_version_from_registry()
+            self._major_version, self._minor_version, self._build_number = self.get_version_from_registry()
 
     def analyze_windows_version(self):
         version = (self._major_version, self._minor_version, self._product_type)
@@ -104,6 +113,11 @@ class Windows(object):  # pylint: disable-msg=R0902,R0904
         # product_type still determines whether this is Windows 10 or Windows Server
         if self._product_type == VER_NT_WORKSTATION:
             self.version = "Windows 10"
+        if self._release_id >= LAST_RELEASE_ID:
+            if self._build_number >= FIRST_WIN_2022_SRVER_BUILD_NUMBER:
+                self.version = "Windows Server 2022"
+            else:
+                self.version = "Windows Server 2019"
         elif self._release_id < FIRST_WIN_SERVER_2019_RELEASE_ID:
             self.version = "Windows Server 2016"
         else:
@@ -200,14 +214,13 @@ class Windows(object):  # pylint: disable-msg=R0902,R0904
         reg_folder = local_machine[r'Software\Microsoft\Windows NT\CurrentVersion']
         major_version = reg_folder.values_store.get('CurrentMajorVersionNumber')
         minor_version = reg_folder.values_store.get('CurrentMinorVersionNumber')
+        build_number = reg_folder.values_store.get('CurrentBuildNumber').to_python_object()
         if major_version and minor_version:
             # should be 10.0
-            return major_version.to_python_object(), minor_version.to_python_object()
+            return major_version.to_python_object(), minor_version.to_python_object(), build_number
         # 6.2 or 6.3
         major_version, minor_version = reg_folder.values_store['CurrentVersion'].to_python_object().split('.')
-        return int(major_version), int(minor_version)
-
-        return major_version, minor_version
+        return int(major_version), int(minor_version), build_number
 
     def analyze_windows6_edition(self):
         from .constants import PRODUCT_SUITE_CLUSTER, PRODUCT_SUITE_DATACENTER
@@ -291,6 +304,9 @@ class Windows(object):  # pylint: disable-msg=R0902,R0904
 
     def is_windows_2019(self):
         return self.version == 'Windows Server 2019'
+
+    def is_windows_2022(self):
+        return self.version == 'Windows Server 2022'
 
     def is_x86(self):
         return self.architecture == 'x86'
